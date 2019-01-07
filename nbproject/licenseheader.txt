@@ -1,0 +1,14 @@
+/* *****************************************
+ * ClearGov Website Analyzer
+ *
+ * Author: Josh Dunbrack
+ * Date: ${date}
+ * Time: ${time}
+ *
+ * Project: ${project.name}
+ * Package: ${package}
+ * File: ${name}
+ * Description: 
+ *
+ * ****************************************
+ */

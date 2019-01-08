@@ -1,7 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* *****************************************
+ * ClearGov Website Analyzer
+ *
+ * Author: Josh Dunbrack
+ * Date: Jan 7, 2019
+ * Time: 11:37:48 AM
+ *
+ * Project: ClearGovReferenceFinder
+ * Package: cleargovreferencefinder
+ * File: ClearGovReferenceFinder
+ *
+ * Description: A data structure to hold information about analyzed clients,
+ *              including name, ID, state, and website URL.
+ * ****************************************
  */
 package cleargovreferencefinder;
 
@@ -10,8 +20,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import javafx.concurrent.Task;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -31,33 +41,31 @@ public class ClearGovReferenceFinder {
 	List<Client> clients = new ArrayList<>();
 
 	/**
-	 * For each client, a list of all of the pages in it to be analyzed.
-	 * In the same order as the list of clients.
-	 */
-	ArrayList<HashSet<String>> pages = new ArrayList<>();
-
-	/**
 	 * Constructor that initializes both lists used in this program.
 	 */
 	public ClearGovReferenceFinder() {
 		clients = getClientsFromSpreadsheet();
-		System.out.println(clients.size());
-		for (int i = 0; i < clients.size(); i++) {
-			Client client = clients.get(i);
-			pages.add(new HashSet<String>());
-			pages.get(i).add(client.getUrlString());
-		}
+		branchAllWebsites(0);
+		branchAllWebsites(1);
 	}
 
-	public static void main(String[] args) throws IOException {
-		ClearGovReferenceFinder ref = new ClearGovReferenceFinder();
-		Document doc = Jsoup.connect("https://www.southhadley.org/").get();
-		for (String s : doc.select("a").eachAttr("href")) {
-			if (s.toLowerCase().contains("cleargov") || s.toLowerCase().startsWith(
-					"/")) {
-				System.out.println(s);
+	/**
+	 * Fills out the specified index of the pages variable.
+	 *
+	 * @param clientIndex The index of the client being analyzed
+	 */
+	public void branchAllWebsites(int clientIndex) {
+		ClientTask task = new ClientTask(clients.get(clientIndex));
+		Thread th = new Thread(task) {
+			public void run() {
+				try {
+					task.call();
+				} catch (Exception e) {
+				};
 			}
-		}
+		};
+		th.setDaemon(false);
+		th.start();
 	}
 
 	/**
@@ -82,6 +90,89 @@ public class ClearGovReferenceFinder {
 			System.out.println(e);
 		} finally {
 			return clientList;
+		}
+	}
+
+	/**
+	 * The task for loading clients concurrently.
+	 */
+	class ClientTask extends Task<Void> {
+
+		Client client;
+		ArrayList<Webpage> clientSubpages;
+		String urlString;
+
+		/**
+		 * Constructs the task with the model and the number of iterations to
+		 * run through
+		 */
+		public ClientTask(Client client) {
+			this.client = client;
+			this.urlString = client.getUrlString();
+			this.clientSubpages = client.getSubpages();
+		}
+
+		/**
+		 *
+		 *
+		 *
+		 * @return null
+		 * @throws Exception if you messed up
+		 */
+		@Override
+		protected Void call() throws Exception {
+			int pageIndex = 0;
+			while (pageIndex < clientSubpages.size()) {
+				try {
+					branchFromWebsite(urlString,
+									  clientSubpages.get(pageIndex),
+									  clientSubpages);
+					System.out.printf("Analyzed %s\n", clientSubpages.get(
+									  pageIndex));
+				} catch (IOException e) {
+				} finally {
+					pageIndex += 1;
+				}
+			}
+			return null;
+		}
+
+		private void branchFromWebsite(String baseURLString,
+									   Webpage currentWebpage,
+									   ArrayList<Webpage> listOfWebpages) throws IOException {
+			String currentURLString = currentWebpage.getUrlString();
+			int currentRecursionDepth = currentWebpage.getRecursionDepth();
+			Document doc = Jsoup.connect(currentURLString).get();
+
+			if (currentRecursionDepth < Webpage.MAX_RECURSION_DEPTH) {
+				for (String tagString : doc.select("a").eachAttr("href")) {
+					if (tagString.toLowerCase().contains(baseURLString) && !listOfWebpages.contains(
+							new Webpage(tagString, currentRecursionDepth + 1))) {
+						listOfWebpages.add(new Webpage(tagString,
+													   currentRecursionDepth + 1));
+					}
+					else if (tagString.startsWith("/") && !listOfWebpages.contains(
+							new Webpage(currentURLString + tagString,
+										currentRecursionDepth + 1))) {
+						listOfWebpages.add(new Webpage(
+								currentURLString + tagString,
+								currentRecursionDepth + 1));
+					}
+					else {
+					}
+				}
+			}
+		}
+
+		/**
+		 * The task for loading different subpages of a client concurrently.
+		 */
+		class SubpageTask extends Task<Void> {
+
+			@Override
+			protected Void call() throws Exception {
+				return null;
+			}
 		}
 	}
 

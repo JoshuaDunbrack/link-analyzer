@@ -15,6 +15,8 @@
  */
 package cleargovreferencefinder;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Joshua Dunbrack
@@ -25,6 +27,7 @@ public class Client {
 	private String state;
 	private int clearGovID;
 	private String urlString;
+	private ArrayList<Webpage> subpages;
 
 	/**
 	 * Constructs the Client object with the provided parameters.
@@ -40,7 +43,9 @@ public class Client {
 		this.organizationName = organizationName;
 		this.state = state;
 		this.clearGovID = clearGovID;
-		this.urlString = urlString;
+		this.urlString = urlString.replace("http://", "https://");
+		subpages = new ArrayList<>();
+		subpages.add(new Webpage(urlString, 0));
 	}
 
 	public String getName() {
@@ -61,5 +66,9 @@ public class Client {
 
 	public String toString() {
 		return "(" + getID() + ") " + getName() + ", " + getState() + ": " + urlString;
+	}
+
+	public ArrayList<Webpage> getSubpages() {
+		return subpages;
 	}
 }

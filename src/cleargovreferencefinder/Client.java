@@ -28,6 +28,7 @@ public class Client {
 	private int clearGovID;
 	private String urlString;
 	private ArrayList<Webpage> subpages;
+	private ArrayList<OutgoingLink> outgoingLinks;
 
 	/**
 	 * Constructs the Client object with the provided parameters.

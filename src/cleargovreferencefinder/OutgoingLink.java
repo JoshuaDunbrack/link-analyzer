@@ -18,7 +18,7 @@ package cleargovreferencefinder;
  *
  * @author Joshua Dunbrack
  */
-class OutgoingLink {
+public class OutgoingLink {
 
 	String sourceURLString;
 	String destinationURLString;
@@ -44,7 +44,7 @@ class OutgoingLink {
 	}
 
 	public String toString() {
-		return "\"" + String.join("\",\"", sourceURLString, destinationURLString,
-								  type.toString()) + "\"\n";
+		return String.join("\",\"", sourceURLString, destinationURLString,
+						   type.toString());
 	}
 }

@@ -28,6 +28,10 @@ public class Webpage {
 
 	public Webpage(String urlString, int recursionDepth) {
 		this.urlString = urlString.replace("http://", "https://");
+		if (this.urlString.endsWith("/")) {
+			this.urlString = this.urlString.substring(0,
+													  this.urlString.length() - 1);
+		}
 		this.recursionDepth = recursionDepth;
 	}
 
@@ -51,9 +55,10 @@ public class Webpage {
 			return false;
 		}
 		final Webpage other = (Webpage) obj;
-		if (!Objects.equals(this.urlString, other.urlString)) {
+		if (!Objects.equals(this.urlString, other.getUrlString())) {
 			return false;
 		}
+
 		return true;
 	}
 

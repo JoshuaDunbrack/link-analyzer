@@ -28,7 +28,7 @@ public class Client {
 	private int clearGovID;
 	private String urlString;
 	private ArrayList<Webpage> subpages;
-	private ArrayList<OutgoingLink> outgoingLinks;
+	private ArrayList<OutgoingLink> outgoingLinks = new ArrayList<>();
 
 	/**
 	 * Constructs the Client object with the provided parameters.
@@ -65,11 +65,29 @@ public class Client {
 		return urlString;
 	}
 
+	@Override
 	public String toString() {
-		return "(" + getID() + ") " + getName() + ", " + getState() + ": " + urlString;
+		String retStr = "";
+		for (OutgoingLink link : outgoingLinks) {
+			retStr += "\"" + String.join("\",\"", getName(), getState(),
+										 String.valueOf(getID()),
+										 link.toString()) + "\"\n";
+
+		}
+		return retStr;
 	}
 
 	public ArrayList<Webpage> getSubpages() {
 		return subpages;
+	}
+
+	public ArrayList<OutgoingLink> getOutgoingLinks() {
+		return outgoingLinks;
+	}
+
+	public void addLink(String sourceURLString, String destinationURLString,
+						OutgoingLinkType type) {
+		outgoingLinks.add(
+				new OutgoingLink(sourceURLString, destinationURLString, type));
 	}
 }

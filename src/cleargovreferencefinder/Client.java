@@ -29,6 +29,8 @@ public class Client {
 	private String urlString;
 	private ArrayList<Webpage> subpages;
 	private ArrayList<OutgoingLink> outgoingLinks = new ArrayList<>();
+	private boolean fail = false;
+	private Exception e = null;
 
 	/**
 	 * Constructs the Client object with the provided parameters.
@@ -65,16 +67,42 @@ public class Client {
 		return urlString;
 	}
 
+	public void fail(Exception e) {
+		if (!fail) {
+			this.fail = true;
+			this.e = e;
+		}
+	}
+
+	public boolean isFailed() {
+		return fail;
+	}
+
 	@Override
 	public String toString() {
-		String retStr = "";
-		for (OutgoingLink link : outgoingLinks) {
-			retStr += "\"" + String.join("\",\"", getName(), getState(),
-										 String.valueOf(getID()),
-										 link.toString()) + "\"\n";
-
+		if (fail) {
+			return "\"" + String.join("\",\"", getName(), getState(),
+									  String.valueOf(getID()),
+									  getUrlString(), "ERROR", e.toString(),
+									  String.valueOf(getSubpages().size())) + "\"\n";
 		}
-		return retStr;
+		if (outgoingLinks.size() == 0) {
+			return "\"" + String.join("\",\"", getName(), getState(),
+									  String.valueOf(getID()),
+									  getUrlString(), "NONE", "NONE",
+									  String.valueOf(getSubpages().size())) + "\"\n";
+		}
+		else {
+			String retStr = "";
+			for (OutgoingLink link : outgoingLinks) {
+				retStr += "\"" + String.join("\",\"", getName(), getState(),
+											 String.valueOf(getID()),
+											 link.toString(), String.valueOf(
+											 getSubpages().size())) + "\"\n";
+
+			}
+			return retStr;
+		}
 	}
 
 	public ArrayList<Webpage> getSubpages() {
@@ -85,9 +113,11 @@ public class Client {
 		return outgoingLinks;
 	}
 
-	public void addLink(String sourceURLString, String destinationURLString,
+	public void addLink(String baseURLString, String sourceURLString,
+						String destinationURLString,
 						OutgoingLinkType type) {
 		outgoingLinks.add(
-				new OutgoingLink(sourceURLString, destinationURLString, type));
+				new OutgoingLink(baseURLString, sourceURLString,
+								 destinationURLString, type));
 	}
 }

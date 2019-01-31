@@ -24,10 +24,14 @@ public class OutgoingLink {
 	String destinationURLString;
 	OutgoingLinkType type;
 
-	public OutgoingLink(String sourceURLString, String destinationURLString,
+	public OutgoingLink(String baseURLString, String sourceURLString,
+						String destinationURLString,
 						OutgoingLinkType type) {
 		this.sourceURLString = sourceURLString;
 		this.destinationURLString = destinationURLString;
+		if (this.destinationURLString.startsWith("/")) {
+			this.destinationURLString = baseURLString + this.destinationURLString;
+		}
 		this.type = type;
 	}
 

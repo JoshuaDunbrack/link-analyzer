@@ -18,16 +18,20 @@ package cleargovreferencefinder;
  *
  * @author Joshua Dunbrack
  */
-class OutgoingLink {
+public class OutgoingLink {
 
 	String sourceURLString;
 	String destinationURLString;
 	OutgoingLinkType type;
 
-	public OutgoingLink(String sourceURLString, String destinationURLString,
+	public OutgoingLink(String baseURLString, String sourceURLString,
+						String destinationURLString,
 						OutgoingLinkType type) {
 		this.sourceURLString = sourceURLString;
 		this.destinationURLString = destinationURLString;
+		if (this.destinationURLString.startsWith("/")) {
+			this.destinationURLString = baseURLString + this.destinationURLString;
+		}
 		this.type = type;
 	}
 
@@ -44,7 +48,7 @@ class OutgoingLink {
 	}
 
 	public String toString() {
-		return "\"" + String.join("\",\"", sourceURLString, destinationURLString,
-								  type.toString()) + "\"\n";
+		return String.join("\",\"", sourceURLString, destinationURLString,
+						   type.toString());
 	}
 }

@@ -28,7 +28,9 @@ public class Client {
 	private int clearGovID;
 	private String urlString;
 	private ArrayList<Webpage> subpages;
-	private ArrayList<OutgoingLink> outgoingLinks;
+	private ArrayList<OutgoingLink> outgoingLinks = new ArrayList<>();
+	private boolean fail = false;
+	private Exception e = null;
 
 	/**
 	 * Constructs the Client object with the provided parameters.
@@ -65,11 +67,57 @@ public class Client {
 		return urlString;
 	}
 
+	public void fail(Exception e) {
+		if (!fail) {
+			this.fail = true;
+			this.e = e;
+		}
+	}
+
+	public boolean isFailed() {
+		return fail;
+	}
+
+	@Override
 	public String toString() {
-		return "(" + getID() + ") " + getName() + ", " + getState() + ": " + urlString;
+		if (fail) {
+			return "\"" + String.join("\",\"", getName(), getState(),
+									  String.valueOf(getID()),
+									  getUrlString(), "ERROR", e.toString(),
+									  String.valueOf(getSubpages().size())) + "\"\n";
+		}
+		if (outgoingLinks.size() == 0) {
+			return "\"" + String.join("\",\"", getName(), getState(),
+									  String.valueOf(getID()),
+									  getUrlString(), "NONE", "NONE",
+									  String.valueOf(getSubpages().size())) + "\"\n";
+		}
+		else {
+			String retStr = "";
+			for (OutgoingLink link : outgoingLinks) {
+				retStr += "\"" + String.join("\",\"", getName(), getState(),
+											 String.valueOf(getID()),
+											 link.toString(), String.valueOf(
+											 getSubpages().size())) + "\"\n";
+
+			}
+			return retStr;
+		}
 	}
 
 	public ArrayList<Webpage> getSubpages() {
 		return subpages;
+	}
+
+	public ArrayList<OutgoingLink> getOutgoingLinks() {
+		return outgoingLinks;
+	}
+
+	public void addLink(String baseURLString, String sourceURLString,
+						String destinationURLString,
+						OutgoingLinkType type) {
+		outgoingLinks.add(
+				new OutgoingLink(baseURLString, sourceURLString,
+								 destinationURLString, type));
 	}
 }

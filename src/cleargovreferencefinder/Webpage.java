@@ -66,4 +66,8 @@ public class Webpage {
 	public String toString() {
 		return String.format("(%s, %d)", urlString, recursionDepth);
 	}
+
+	public void makeHTTP() {
+		this.urlString = this.urlString.replace("http://", "https://");
+	}
 }

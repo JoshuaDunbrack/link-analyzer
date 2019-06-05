@@ -1,3 +1,30 @@
 ﻿Organization Name,State,CG ID,Organisation - Org Website
 Plymouth,MA,721,https://www.plymouth-ma.gov/
 Natick,MA,680,https://www.natickma.gov/
+
+def fp(num):
+	ret = ""
+	exp = 127
+	if(num < 0):
+		ret += "1"
+		num *= -1
+	else:
+		ret += "0"
+	while(num >= 2):
+		exp += 1
+		num /= 2
+	num -= 1
+	exp = str(bin(exp))[2:].zfill(8)
+	ret += exp
+	while(len(ret)) < 31:
+		num *= 2
+		if(num >= 1):
+			num -= 1
+			ret += "1"
+			print(num)
+		else:
+			ret += "0"
+			print(num)
+	num *= 2
+	ret += str(round(num))
+	return ret

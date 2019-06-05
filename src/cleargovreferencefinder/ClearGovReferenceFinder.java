@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.concurrent.Task;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLProtocolException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -156,7 +158,7 @@ public class ClearGovReferenceFinder {
 					printActiveThreads();
 					System.out.println(runs);
 				}
-				if (runs > 120000) {
+				if (runs > 20000) {
 					printActiveThreads();
 					System.out.println("Cancelling " + client.getName());
 					break;
@@ -277,18 +279,22 @@ public class ClearGovReferenceFinder {
 						"login") || currentURLString.contains("HDAACORG")) {
 					return null;
 				}
-				Document doc = null;
+				// Old method
+				Document doc = new Document("");
 				try {
 					int errorCount = 0;
 					int prevErrorCount = 0;
 					do {
-						//System.out.println(currentURLString);
 						try {
 							Connection connection = Jsoup.connect(
 									currentURLString);
 							doc = connection.get();
+						} catch (ConnectException | SSLHandshakeException | SSLProtocolException e) {
+							currentWebpage.makeHTTP();
+							currentURLString = currentWebpage.getUrlString();
+							errorCount++;
 						} catch (SocketException e) {
-							errorCount += 1;
+							errorCount++;
 							try {
 								Thread.sleep(1000);
 							} catch (InterruptedException ex) {
@@ -306,11 +312,12 @@ public class ClearGovReferenceFinder {
 								Thread.sleep(30000);
 							} catch (InterruptedException ex) {
 							}
-							errorCount += 1;
+							errorCount++;
 							if (errorCount > 5) {
 								return null;
 							}
 						}
+
 					}
 					while (errorCount > prevErrorCount++);
 					if (currentWebpage.getRecursionDepth() < Webpage.MAX_RECURSION_DEPTH) {
@@ -327,10 +334,11 @@ public class ClearGovReferenceFinder {
 					}
 					// return e;
 				} catch (Exception e) {
-					System.out.println("UN: " + e);
+					System.out.println("UN: " + e.toString());
 					// return e;
 					//System.out.println(currentWebpage.getUrlString());
 				}
+
 				return null;
 			}
 
